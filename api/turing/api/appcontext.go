@@ -75,14 +75,19 @@ func NewAppContext(
 	}
 
 	// Initialise cluster controllers
-	clusterControllers, err := cluster.InitClusterControllers(cfg, envClusterMap, vaultClient)
+	clusterControllers, err := cluster.InitClusterControllers(cfg.DeployConfig.GcpProject, envClusterMap, vaultClient)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed initializing cluster controllers")
 	}
 
 	appContext := &AppContext{
-		Authorizer:            authorizer,
-		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers),
+		Authorizer: authorizer,
+		DeploymentService: service.NewDeploymentService(
+			cfg.DeployConfig,
+			cfg.RouterDefaults,
+			cfg.Sentry,
+			clusterControllers,
+		),
 		RoutersService:        service.NewRoutersService(db),
 		RouterVersionsService: service.NewRouterVersionsService(db),
 		EventService:          service.NewEventService(db),

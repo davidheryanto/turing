@@ -144,11 +144,11 @@ func TestNewAppContext(t *testing.T) {
 	)
 	monkey.Patch(cluster.InitClusterControllers,
 		func(
-			cfg *config.Config,
+			gcpProject string,
 			environmentClusterMap map[string]string,
 			vaultClient vault.VaultClient,
 		) (map[string]cluster.Controller, error) {
-			assert.Equal(t, testCfg, cfg)
+			assert.Equal(t, testCfg.DeployConfig.GcpProject, gcpProject)
 			assert.Equal(t, map[string]string{
 				"N1": "C1",
 			}, environmentClusterMap)
@@ -198,8 +198,13 @@ func TestNewAppContext(t *testing.T) {
 	appCtx, err := NewAppContext(nil, testCfg, &testEnforcer, testVaultClient)
 	assert.NoError(t, err)
 	assert.Equal(t, &AppContext{
-		Authorizer:            testAuthorizer,
-		DeploymentService:     service.NewDeploymentService(testCfg, map[string]cluster.Controller{}),
+		Authorizer: testAuthorizer,
+		DeploymentService: service.NewDeploymentService(
+			testCfg.DeployConfig,
+			testCfg.RouterDefaults,
+			testCfg.Sentry,
+			map[string]cluster.Controller{},
+		),
 		RoutersService:        service.NewRoutersService(nil),
 		RouterVersionsService: service.NewRouterVersionsService(nil),
 		EventService:          service.NewEventService(nil),

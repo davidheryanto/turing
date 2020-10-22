@@ -26,7 +26,6 @@ import (
 	knservingclient "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
 
 	"github.com/gojek/mlp/pkg/vault"
-	"github.com/gojek/turing/api/turing/config"
 	"github.com/pkg/errors"
 
 	// Load required auth plugin
@@ -122,7 +121,7 @@ func newController(clusterCfg clusterConfig) (Controller, error) {
 // from vault to initialize one cluster controller per environment and returns a map where the
 // key is the env name and the value is the corresponding controller.
 func InitClusterControllers(
-	cfg *config.Config,
+	gcpProject string,
 	environmentClusterMap map[string]string,
 	vaultClient vault.VaultClient,
 ) (map[string]Controller, error) {
@@ -142,7 +141,7 @@ func InitClusterControllers(
 			ClientKey:  clusterSecret.ClientKey,
 
 			ClusterName: clusterName,
-			GcpProject:  cfg.DeployConfig.GcpProject,
+			GcpProject:  gcpProject,
 		})
 		if err != nil {
 			return nil, errors.Wrap(err, "unable to initialize cluster controller")

@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/gojek/mlp/pkg/instrumentation/sentry"
+
 	"strings"
 	"sync"
 	"time"
@@ -67,23 +69,25 @@ type uFunc func(context.Context, *cluster.KnativeService, *sync.WaitGroup, chan<
 
 // NewDeploymentService initialises a new endpoints service
 func NewDeploymentService(
-	cfg *config.Config,
+	deploymentConfig *config.DeploymentConfig,
+	routerDefaults *config.RouterDefaults,
+	sentryConfig sentry.Config,
 	clusterControllers map[string]cluster.Controller,
 ) DeploymentService {
 	// Create cluster service builder
 	sb := servicebuilder.NewClusterServiceBuilder(
-		resource.Quantity(cfg.DeployConfig.MaxCPU),
-		resource.Quantity(cfg.DeployConfig.MaxMemory),
+		resource.Quantity(deploymentConfig.MaxCPU),
+		resource.Quantity(deploymentConfig.MaxMemory),
 	)
 
 	return &deploymentService{
-		deploymentTimeout:         cfg.DeployConfig.Timeout,
-		deploymentDeletionTimeout: cfg.DeployConfig.DeletionTimeout,
-		environmentType:           cfg.DeployConfig.EnvironmentType,
-		fluentdConfig:             cfg.RouterDefaults.FluentdConfig,
-		jaegerCollectorEndpoint:   cfg.RouterDefaults.JaegerCollectorEndpoint,
-		sentryEnabled:             cfg.Sentry.Enabled,
-		sentryDSN:                 cfg.Sentry.DSN,
+		deploymentTimeout:         deploymentConfig.Timeout,
+		deploymentDeletionTimeout: deploymentConfig.DeletionTimeout,
+		environmentType:           deploymentConfig.EnvironmentType,
+		fluentdConfig:             routerDefaults.FluentdConfig,
+		jaegerCollectorEndpoint:   routerDefaults.JaegerCollectorEndpoint,
+		sentryEnabled:             sentryConfig.Enabled,
+		sentryDSN:                 sentryConfig.DSN,
 		clusterControllers:        clusterControllers,
 		svcBuilder:                sb,
 	}
