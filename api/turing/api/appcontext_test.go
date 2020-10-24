@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -123,7 +124,7 @@ func TestNewAppContext(t *testing.T) {
 		},
 	)
 	monkey.Patch(service.NewExperimentsService,
-		func() (service.ExperimentsService, error) {
+		func(config json.RawMessage) (service.ExperimentsService, error) {
 			return nil, nil
 		},
 	)
@@ -186,7 +187,7 @@ func TestNewAppContext(t *testing.T) {
 	mlpService, err := service.NewMLPService(testCfg.MLPConfig.MLPURL,
 		testCfg.MLPConfig.MLPEncryptionKey, testCfg.MLPConfig.MerlinURL)
 	assert.NoError(t, err)
-	experimentService, err := service.NewExperimentsService()
+	experimentService, err := service.NewExperimentsService(nil)
 	assert.NoError(t, err)
 	gitlabClient, err := gitlab.NewClient(
 		testCfg.AlertConfig.GitLab.Token,

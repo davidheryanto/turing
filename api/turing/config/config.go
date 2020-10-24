@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -48,6 +49,7 @@ type Config struct {
 	// SwaggerFile specifies the file path containing OpenAPI spec. This file will be used to configure
 	// OpenAPI validation middleware, which validates HTTP requests against the spec.
 	SwaggerFile string `envconfig:"swagger_file" default:"swagger.yaml"`
+	Experiment  json.RawMessage
 }
 
 // ListenAddress returns the Turing Api app's port
@@ -101,6 +103,7 @@ type RouterDefaults struct {
 	LogLevel string `split_words:"true" default:"INFO"`
 	// Fluentd config for the router
 	FluentdConfig *FluentdConfig `envconfig:"fluentd"`
+	Experiment    json.RawMessage
 }
 
 // FluentdConfig captures the defaults used by the Turing Router when Fluentd is enabled

@@ -57,7 +57,7 @@ type Experiment struct {
 }
 
 // NewExperimentsService creates a new experiment service from the given config
-func NewExperimentsService() (ExperimentsService, error) {
+func NewExperimentsService(config json.RawMessage) (ExperimentsService, error) {
 	experimentManagers := make(map[models.ExperimentEngineType]manager.ExperimentManager)
 
 	// Initialize the experimentsService with cache
