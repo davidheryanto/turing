@@ -41,7 +41,7 @@ turing:
 
   # -- Turing API server configuration. 
   # Refer to https://github.com/gojek/turing/blob/main/api/turing/config/example.yaml
-  config: {}
+  config: {} 
 
   # -- List of string containing additional Turing API server arguments. For
   # example, multiple "-config" can be specified to use multiple config files
