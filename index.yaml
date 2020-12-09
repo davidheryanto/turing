@@ -1,6 +1,14 @@
 apiVersion: v1
 entries:
   turing:
+  - apiVersion: v1
+    created: "2020-12-09T16:10:34.345757539Z"
+    description: 'Turing: ML Experimentation System'
+    digest: 5bb752f989ef0ac627307667a7245e8251d03fdfb9ba83af8b39a9ffa073d1a2
+    name: turing
+    urls:
+    - https://github.com/davidheryanto/turing/releases/download/turing-chart-0.1.2/turing-0.1.2.tgz
+    version: 0.1.2
   - apiVersion: v2
     created: "2020-12-09T12:42:43.299954632Z"
     dependencies:
