@@ -3,7 +3,7 @@ name: helm-chart
 on:
   push:
     branches:
-    - master
+    - chart-release-staging
 
 jobs:
   release:
