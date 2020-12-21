@@ -35,7 +35,7 @@ var expectedAlertContent string = strings.Join([]string{
 	`    annotations:`,
 	`      dashboard: TODO`,
 	`      description: 'throughput for the past 5m: {{ $value }}rps'`,
-	`      playbook: TODO`,
+	`      playbook: https://example.com`,
 	`      summary: 'throughput is lower than the threshold: 50rps'`,
 	`  - alert: service_throughput_violation_env`,
 	`    expr: |`,
@@ -51,7 +51,7 @@ var expectedAlertContent string = strings.Join([]string{
 	`    annotations:`,
 	`      dashboard: TODO`,
 	`      description: 'throughput for the past 5m: {{ $value }}rps'`,
-	`      playbook: TODO`,
+	`      playbook: https://example.com`,
 	`      summary: 'throughput is lower than the threshold: 25rps'\n`,
 }, "\\n")
 
@@ -66,7 +66,7 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 	mockSQL.
 		ExpectQuery(`INSERT INTO "alerts"`).
 		WithArgs(time.Unix(1593647218, 0), time.Unix(1593647219, 0), "env", "team",
-			"service", "throughput", float64(50), float64(25), "5m").
+			"service", "throughput", float64(50), float64(25), "5m", "https://example.com").
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	mockSQL.ExpectCommit()
 	mockSQL.
@@ -77,7 +77,7 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 	git, err := gitlab.NewClient("token", gitlab.WithBaseURL(mockGitlab.URL))
 	assert.NilError(t, err)
 
-	service := NewGitlabOpsAlertService(mockDb, git, "project", "master", "prefix")
+	service := NewGitlabOpsAlertService(mockDb, git, "project", "master", "prefix", "https://example.com")
 	alert := models.Alert{
 		Model: models.Model{
 			CreatedAt: time.Unix(1593647218, 0),
@@ -90,6 +90,7 @@ func TestGitlabOpsAlertServiceSave(t *testing.T) {
 		WarningThreshold:  50,
 		CriticalThreshold: 25,
 		Duration:          "5m",
+		PlaybookURL:       "https://example.com",
 	}
 
 	_, err = service.Save(alert, "user@gojek.com")
@@ -123,7 +124,7 @@ func TestGitlabOpsAlertServiceSaveShouldRevertGitWhenDbFail(t *testing.T) {
 	git, err := gitlab.NewClient("token", gitlab.WithBaseURL(mockGitlab.URL))
 	assert.NilError(t, err)
 
-	service := NewGitlabOpsAlertService(mockDb, git, "project", "master", "prefix")
+	service := NewGitlabOpsAlertService(mockDb, git, "project", "master", "prefix", "https://example.com")
 	alert := models.Alert{
 		Environment: "env",
 		Team:        "team",
@@ -150,7 +151,7 @@ func TestGitlabOpsAlertServiceList(t *testing.T) {
 		WithArgs("service").
 		WillReturnRows(sqlmock.NewRows(columns).AddRow("env", "team", "service", "throughput", "5m"))
 
-	service := NewGitlabOpsAlertService(mockDb, nil, "", "", "")
+	service := NewGitlabOpsAlertService(mockDb, nil, "", "", "", "https://example.com")
 
 	alerts, err := service.List("service")
 	assert.NilError(t, err)
@@ -179,7 +180,7 @@ func TestGitlabOpsAlertServiceFindByID(t *testing.T) {
 		WithArgs(5).
 		WillReturnRows(sqlmock.NewRows(columns).AddRow("env", "team", "service", "throughput", "5m"))
 
-	service := NewGitlabOpsAlertService(mockDb, nil, "", "", "")
+	service := NewGitlabOpsAlertService(mockDb, nil, "", "", "", "https://example.com")
 
 	alert, err := service.FindByID(5)
 	assert.NilError(t, err)
@@ -206,7 +207,7 @@ func TestGitlabOpsAlertServiceFindByIDShouldReturnErrWhenNotFound(t *testing.T) 
 		WithArgs(1).
 		WillReturnError(errors.New("select not found"))
 
-	service := NewGitlabOpsAlertService(mockDb, nil, "", "", "")
+	service := NewGitlabOpsAlertService(mockDb, nil, "", "", "", "https://example.com")
 
 	_, err := service.FindByID(1)
 	assert.ErrorContains(t, err, "select not found")
@@ -226,14 +227,14 @@ func TestGitlabOpsAlertServiceUpdate(t *testing.T) {
 	mockSQL.ExpectBegin()
 	mockSQL.
 		ExpectExec(`UPDATE "alerts"`).
-		WithArgs(sqlmock.AnyArg(), "env", "team", "service", "throughput", float64(50), float64(25), "5m", 1).
+		WithArgs(sqlmock.AnyArg(), "env", "team", "service", "throughput", float64(50), float64(25), "5m", "https://example.com", 1).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mockSQL.ExpectCommit()
 
 	git, err := gitlab.NewClient("token", gitlab.WithBaseURL(mockGitlab.URL))
 	assert.NilError(t, err)
 
-	service := NewGitlabOpsAlertService(mockDb, git, "project", "master", "prefix")
+	service := NewGitlabOpsAlertService(mockDb, git, "project", "master", "prefix", "https://example.com")
 	alert := models.Alert{
 		Model:             models.Model{ID: 1},
 		Environment:       "env",
@@ -243,6 +244,7 @@ func TestGitlabOpsAlertServiceUpdate(t *testing.T) {
 		WarningThreshold:  50,
 		CriticalThreshold: 25,
 		Duration:          "5m",
+		PlaybookURL:       "https://example.com",
 	}
 
 	err = service.Update(alert, "user@gojek.com")
@@ -284,7 +286,7 @@ func TestGitlabOpsAlertServiceUpdateShouldRevertGitWhenDbFail(t *testing.T) {
 	git, err := gitlab.NewClient("token", gitlab.WithBaseURL(mockGitlab.URL))
 	assert.NilError(t, err)
 
-	service := NewGitlabOpsAlertService(mockDb, git, "project", "master", "prefix")
+	service := NewGitlabOpsAlertService(mockDb, git, "project", "master", "prefix", "https://example.com")
 	alert := models.Alert{
 		Model:       models.Model{ID: 1},
 		Environment: "env",
@@ -327,7 +329,7 @@ func TestGitlabOpsAlertSeviceDelete(t *testing.T) {
 	git, err := gitlab.NewClient("token", gitlab.WithBaseURL(mockGitlab.URL))
 	assert.NilError(t, err)
 
-	service := NewGitlabOpsAlertService(mockDb, git, "project", "master", "prefix")
+	service := NewGitlabOpsAlertService(mockDb, git, "project", "master", "prefix", "https://example.com")
 	alert := models.Alert{
 		Model: models.Model{
 			ID: 1,
@@ -373,7 +375,7 @@ func TestGitlabOpsAlertSeviceDeleteShouldRevertGitWhenDbFail(t *testing.T) {
 	git, err := gitlab.NewClient("token", gitlab.WithBaseURL(mockGitlab.URL))
 	assert.NilError(t, err)
 
-	service := NewGitlabOpsAlertService(mockDb, git, "project", "master", "prefix")
+	service := NewGitlabOpsAlertService(mockDb, git, "project", "master", "prefix", "https://example.com")
 	alert := models.Alert{
 		Model:       models.Model{ID: 1},
 		Environment: "env",

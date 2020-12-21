@@ -49,6 +49,20 @@ func (_m *AlertService) FindByID(id uint) (*models.Alert, error) {
 	return r0, r1
 }
 
+// GetPlaybookURL provides a mock function with given fields:
+func (_m *AlertService) GetPlaybookURL() string {
+	ret := _m.Called()
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
 // List provides a mock function with given fields: _a0
 func (_m *AlertService) List(_a0 string) ([]*models.Alert, error) {
 	ret := _m.Called(_a0)

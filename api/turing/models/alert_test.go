@@ -82,6 +82,7 @@ func TestAlertGroup(t *testing.T) {
 		Duration:          "1m",
 		WarningThreshold:  0.95,
 		CriticalThreshold: 0.90,
+		PlaybookURL:       "https://example.com",
 	}
 
 	expected := schema.AlertGroup{
@@ -104,7 +105,7 @@ func TestAlertGroup(t *testing.T) {
 				Annotations: map[string]string{
 					"dashboard":   "TODO",
 					"description": "cpu_util for the past 1m: {{ $value }}%",
-					"playbook":    "TODO",
+					"playbook":    "https://example.com",
 					"summary":     "cpu_util is higher than the threshold: 1%",
 				},
 			},
@@ -125,7 +126,7 @@ func TestAlertGroup(t *testing.T) {
 				Annotations: map[string]string{
 					"dashboard":   "TODO",
 					"description": "cpu_util for the past 1m: {{ $value }}%",
-					"playbook":    "TODO",
+					"playbook":    "https://example.com",
 					"summary":     "cpu_util is higher than the threshold: 1%",
 				},
 			},

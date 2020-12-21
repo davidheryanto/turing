@@ -103,7 +103,7 @@ func NewAppContext(
 				cfg.AlertConfig.GitLab)
 		}
 		appContext.AlertService = service.NewGitlabOpsAlertService(db, gitlabClient, cfg.AlertConfig.GitLab.ProjectID,
-			cfg.AlertConfig.GitLab.Branch, cfg.AlertConfig.GitLab.PathPrefix)
+			cfg.AlertConfig.GitLab.Branch, cfg.AlertConfig.GitLab.PathPrefix, cfg.AlertConfig.PlaybookURL)
 	}
 
 	// Initialize OpenAPI validation middleware

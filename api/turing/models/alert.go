@@ -40,6 +40,8 @@ type Alert struct {
 	// The duration format is a sequence of decimal numbers followed by a time unit suffix.
 	// For instance: 5m
 	Duration string `json:"duration" validate:"required"`
+	// PlaybookURL is the URL that contains documentation how to resolve triggered alerts
+	PlaybookURL string `json:"playbook_url"`
 }
 
 type Metric string
@@ -92,7 +94,7 @@ func (alert Alert) Group() schema.AlertGroup {
 					getAlertUnit(alert.Metric),
 				),
 				"dashboard": "TODO",
-				"playbook":  "TODO",
+				"playbook":  alert.PlaybookURL,
 			},
 		})
 	}
@@ -120,7 +122,7 @@ func (alert Alert) Group() schema.AlertGroup {
 					getAlertUnit(alert.Metric),
 				),
 				"dashboard": "TODO",
-				"playbook":  "TODO",
+				"playbook":  alert.PlaybookURL,
 			},
 		})
 	}

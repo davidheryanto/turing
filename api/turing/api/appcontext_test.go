@@ -165,10 +165,11 @@ func TestNewAppContext(t *testing.T) {
 	)
 	monkey.Patch(service.NewGitlabOpsAlertService,
 		func(db *gorm.DB, gitlab *gitlab.Client, gitlabProjectID string, gitlabBranch string,
-			gitlabPathPrefix string) service.AlertService {
+			gitlabPathPrefix string, playbookURL string) service.AlertService {
 			assert.Equal(t, testCfg.AlertConfig.GitLab.ProjectID, gitlabProjectID)
 			assert.Equal(t, testCfg.AlertConfig.GitLab.Branch, gitlabBranch)
 			assert.Equal(t, testCfg.AlertConfig.GitLab.PathPrefix, gitlabPathPrefix)
+			assert.Equal(t, testCfg.AlertConfig.PlaybookURL, playbookURL)
 			return nil
 		},
 	)
@@ -212,6 +213,7 @@ func TestNewAppContext(t *testing.T) {
 			testCfg.AlertConfig.GitLab.ProjectID,
 			testCfg.AlertConfig.GitLab.Branch,
 			testCfg.AlertConfig.GitLab.PathPrefix,
+			testCfg.AlertConfig.PlaybookURL,
 		),
 		OpenAPIValidation: &middleware.OpenAPIValidation{},
 	}, appCtx)

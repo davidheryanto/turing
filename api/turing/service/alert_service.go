@@ -19,6 +19,7 @@ type AlertService interface {
 	FindByID(id uint) (*models.Alert, error)
 	Update(alert models.Alert, authorEmail string) error
 	Delete(alert models.Alert, authorEmail string) error
+	GetPlaybookURL() string
 }
 
 type gitlabOpsAlertService struct {
@@ -27,6 +28,7 @@ type gitlabOpsAlertService struct {
 	gitlabProjectID  string         // GitLab project ID where the alert will be committed to
 	gitlabBranch     string         // GitLab branch where the alert will be committed to. The branch must already exist
 	gitlabPathPrefix string         // The alert file will be created under the gitlabPathPrefix folder
+	playbookURL      string         // URL that contains documentation how to resolve triggered alerts
 }
 
 // Create a new AlertService that can be used with GitOps based on GitLab. It is assumed
@@ -42,14 +44,15 @@ type gitlabOpsAlertService struct {
 // with the alert files in GitLab (as long as the Git files are not manually modified i.e.
 // the alert files are only updated by calling this service).
 //
-func NewGitlabOpsAlertService(db *gorm.DB, gitlab *gitlab.Client,
-	gitlabProjectID string, gitlabBranch string, gitlabPathPrefix string) AlertService {
+func NewGitlabOpsAlertService(db *gorm.DB, gitlab *gitlab.Client, gitlabProjectID string,
+	gitlabBranch string, gitlabPathPrefix string, playbookURL string) AlertService {
 	return &gitlabOpsAlertService{
 		db:               db,
 		gitlab:           gitlab,
 		gitlabBranch:     gitlabBranch,
 		gitlabProjectID:  gitlabProjectID,
 		gitlabPathPrefix: gitlabPathPrefix,
+		playbookURL:      playbookURL,
 	}
 }
 
@@ -57,6 +60,7 @@ func NewGitlabOpsAlertService(db *gorm.DB, gitlab *gitlab.Client,
 // The Git file creation will be committed by "authorEmail". Save will fail if either GitLab
 // or the database is down.
 func (service *gitlabOpsAlertService) Save(alert models.Alert, authorEmail string) (*models.Alert, error) {
+	alert.PlaybookURL = service.playbookURL
 	if err := alert.Validate(); err != nil {
 		return nil, fmt.Errorf("alert is invalid: %s", err)
 	}
@@ -137,6 +141,10 @@ func (service *gitlabOpsAlertService) Delete(alert models.Alert, authorEmail str
 		return fmt.Errorf("failed to delete alert in the database: %s", err)
 	}
 	return nil
+}
+
+func (service *gitlabOpsAlertService) GetPlaybookURL() string {
+	return service.playbookURL
 }
 
 func (service *gitlabOpsAlertService) createInGitLab(alert models.Alert, authorEmail string) error {
