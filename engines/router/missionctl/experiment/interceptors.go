@@ -2,6 +2,8 @@ package experiment
 
 import (
 	"context"
+	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/gojek/turing/engines/experiment/runner"
@@ -38,8 +40,14 @@ func (i *MetricsInterceptor) AfterCompletion(
 ) {
 	labels := make(map[string]string)
 	labels["status"] = metrics.GetStatusString(err == nil)
+	fmt.Println("context value for experiment name", ctx.Value(runner.ExperimentNameKey))
 	if experimentName, ok := ctx.Value(runner.ExperimentNameKey).(string); ok {
+		print(">>> " + experimentName)
 		labels["experiment_name"] = experimentName
+	}
+	labels["dummy"] = ""
+	if rand.Float64() > 0.15 {
+		labels["dummy"] = "greater"
 	}
 	if _, ok := ctx.Value("NOT_EXISTS").(string); ok {
 		labels["not_exists"] = "dummy"
@@ -51,9 +59,7 @@ func (i *MetricsInterceptor) AfterCompletion(
 		metrics.Glob().MeasureDurationMsSince(
 			metrics.ExperimentEngineRequestMs,
 			startTime,
-			map[string]string{
-				"status": metrics.GetStatusString(err == nil),
-			},
+			labels,
 		)
 	}
 }
