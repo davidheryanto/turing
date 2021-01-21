@@ -6,8 +6,12 @@ import "context"
 type ContextKey string
 
 const (
-	// ExperimentNameKey represents the key for the name of the experiment, stored in the context
+	// EngineNameKey represents the key for the experiment engine name, stored in the context
+	EngineNameKey ContextKey = "engineNameKey"
+	// ExperimentNameKey represents the key for the experiment name, stored in the context
 	ExperimentNameKey ContextKey = "experimentNameKey"
+	// TreatmentNameKey represents the key for the treatment name, stored in the context
+	TreatmentNameKey ContextKey = "treatmentNameKey"
 )
 
 // Logger interface defines a minimal set of methods expected to be implemented by

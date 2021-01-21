@@ -36,6 +36,15 @@ func (i *MetricsInterceptor) AfterCompletion(
 	ctx context.Context,
 	err error,
 ) {
+	labels := make(map[string]string)
+	labels["status"] = metrics.GetStatusString(err == nil)
+	if experimentName, ok := ctx.Value(runner.ExperimentNameKey).(string); ok {
+		labels["experiment_name"] = experimentName
+	}
+	if _, ok := ctx.Value("NOT_EXISTS").(string); ok {
+		labels["not_exists"] = "dummy"
+	}
+
 	// Get start time
 	if startTime, ok := ctx.Value(startTimeKey).(time.Time); ok {
 		// Measure the time taken for the experiment run
